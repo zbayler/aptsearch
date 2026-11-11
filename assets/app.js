@@ -10,17 +10,35 @@
 
   // ---------- map ----------
   const map = L.map("map", { zoomControl: true }).setView([39.697, -104.984], 15);
-  // Standard OpenStreetMap tiles: free, no API key (light personal use is within
-  // the OSM tile policy). Dark mode dims them with a CSS filter (see style.css).
-  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 19,
-    className: "base-tiles",
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-  }).addTo(map);
+  // Basemaps: all free, no API key. "Muted" is the standard OSM map greyed out
+  // with a CSS filter (see style.css) so the bike network and pins stand out.
+  const OSM_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+  const OSM_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
+  const basemaps = {
+    "Muted (grey)": L.tileLayer(OSM_URL, { maxZoom: 19, className: "base-tiles base-muted", attribution: OSM_ATTR }),
+    "Standard (colour)": L.tileLayer(OSM_URL, { maxZoom: 19, className: "base-tiles", attribution: OSM_ATTR }),
+    "Cycling (CyclOSM)": L.tileLayer("https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png", {
+      maxZoom: 19, subdomains: "abc", className: "base-tiles",
+      attribution: `${OSM_ATTR} &middot; <a href="https://www.cyclosm.org">CyclOSM</a>`,
+    }),
+  };
+  const BASEMAP_KEY = "aptsearch.basemap";
+  let startBase = "Muted (grey)";
+  try { const saved = localStorage.getItem(BASEMAP_KEY); if (saved && basemaps[saved]) startBase = saved; } catch (_) {}
+  basemaps[startBase].addTo(map);
+  map.on("baselayerchange", (e) => { try { localStorage.setItem(BASEMAP_KEY, e.name); } catch (_) {} });
 
   const zoneLayer = L.layerGroup().addTo(map);
+  const railLayer = L.layerGroup().addTo(map);
+  const bikeLayer = L.layerGroup().addTo(map);
+  const stationLayer = L.layerGroup().addTo(map);
   const aptLayer = L.layerGroup().addTo(map);
   const osmLayer = L.layerGroup().addTo(map);
+  L.control.layers(basemaps, {
+    "15-min walk zones": zoneLayer,
+    "Bike trails &amp; lanes (½ mi)": bikeLayer,
+    "Light rail tracks": railLayer,
+  }, { position: "topright", collapsed: true }).addTo(map);
 
   const stationColor = (id) => (id === "louisiana-pearl" ? css("--lp") : css("--ib"));
 
@@ -174,6 +192,143 @@
     }
   }
 
+  // ---------- bike network + light rail (OpenStreetMap, fetched in the browser) ----------
+  const BIKE_RADIUS_M = 805; // 0.5 mile
+  const BIKE_CACHE_KEY = "aptsearch.bike.v1";
+  const BIKE_CACHE_MS = 7 * 24 * 3600 * 1000;
+
+  // Off-street trail > protected lane > painted lane > shared lane (sharrows).
+  function bikeClass(t) {
+    const any = (re) => ["cycleway", "cycleway:both", "cycleway:left", "cycleway:right"].some((k) => re.test(t[k] || ""));
+    if (t.highway === "cycleway" || (/^(path|footway|track)$/.test(t.highway || "") && t.bicycle === "designated")) return "trail";
+    if (any(/^track$/)) return "protected";
+    if (any(/^lane$/)) return "lane";
+    if (any(/^shared_lane$/) || t.bicycle_road === "yes") return "shared";
+    return null;
+  }
+  const BIKE_STYLE = {
+    trail: { cls: "bk-trail", weight: 6, dash: null, label: "Off-street trail" },
+    protected: { cls: "bk-protected", weight: 5, dash: null, label: "Protected bike lane" },
+    lane: { cls: "bk-lane", weight: 4, dash: "8 6", label: "Painted bike lane" },
+    shared: { cls: "bk-shared", weight: 3, dash: "2 6", label: "Shared lane (sharrows)" },
+  };
+
+  // Keep only the parts of a line that fall inside any of the circles.
+  function clipToCircles(pts, circles) {
+    const out = []; let cur = null;
+    const lat0 = circles[0].lat, mx = 111320 * Math.cos(lat0 * Math.PI / 180), my = 111320;
+    const P = (p) => [(p[1] - circles[0].lon) * mx, (p[0] - lat0) * my];
+    const C = circles.map((c) => ({ x: (c.lon - circles[0].lon) * mx, y: (c.lat - lat0) * my, r: c.r }));
+    const lerp = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+    for (let i = 0; i + 1 < pts.length; i++) {
+      const a = pts[i], b = pts[i + 1], A = P(a), B = P(b);
+      const dx = B[0] - A[0], dy = B[1] - A[1], qa = dx * dx + dy * dy;
+      const iv = [];
+      for (const c of C) {
+        const fx = A[0] - c.x, fy = A[1] - c.y;
+        if (qa === 0) { if (fx * fx + fy * fy <= c.r * c.r) iv.push([0, 1]); continue; }
+        const qb = 2 * (fx * dx + fy * dy), qc = fx * fx + fy * fy - c.r * c.r, disc = qb * qb - 4 * qa * qc;
+        if (disc < 0) continue;
+        const s = Math.sqrt(disc), t0 = Math.max(0, (-qb - s) / (2 * qa)), t1 = Math.min(1, (-qb + s) / (2 * qa));
+        if (t1 > t0) iv.push([t0, t1]);
+      }
+      iv.sort((u, v) => u[0] - v[0]);
+      const merged = [];
+      for (const [s0, s1] of iv) {
+        if (merged.length && s0 <= merged[merged.length - 1][1]) merged[merged.length - 1][1] = Math.max(merged[merged.length - 1][1], s1);
+        else merged.push([s0, s1]);
+      }
+      for (const [s0, s1] of merged) {
+        const p0 = lerp(a, b, s0), p1 = lerp(a, b, s1);
+        if (cur && s0 === 0) cur.push(p1);
+        else { if (cur) out.push(cur); cur = [p0, p1]; }
+        if (s1 < 1) { out.push(cur); cur = null; }
+      }
+      if (!merged.length && cur) { out.push(cur); cur = null; }
+    }
+    if (cur) out.push(cur);
+    return out.filter((l) => l.length > 1);
+  }
+
+  async function fetchBikeAndRail(stations) {
+    try {
+      const c = JSON.parse(localStorage.getItem(BIKE_CACHE_KEY) || "null");
+      if (c && Date.now() - c.at < BIKE_CACHE_MS) return c.elements;
+    } catch (_) {}
+    const parts = stations.map((s) => {
+      const a = `(around:${BIKE_RADIUS_M},${s.lat},${s.lon})`;
+      return `way["highway"="cycleway"]${a};way["highway"~"^(path|footway|track)$"]["bicycle"="designated"]${a};` +
+        `way["cycleway"~"^(lane|track|shared_lane)$"]${a};way["cycleway:both"~"^(lane|track|shared_lane)$"]${a};` +
+        `way["cycleway:left"~"^(lane|track|shared_lane)$"]${a};way["cycleway:right"~"^(lane|track|shared_lane)$"]${a};` +
+        `way["bicycle_road"="yes"]${a};way["railway"="light_rail"](around:2000,${s.lat},${s.lon});`;
+    }).join("");
+    const q = `[out:json][timeout:30];(${parts});out geom tags;`;
+    const res = await fetch(OVERPASS, { method: "POST", body: "data=" + encodeURIComponent(q), headers: { "Content-Type": "application/x-www-form-urlencoded" } });
+    if (!res.ok) throw new Error(`Overpass ${res.status}`);
+    const elements = ((await res.json()).elements || []).filter((e) => e.geometry)
+      .map((e) => ({ id: e.id, tags: e.tags || {}, g: e.geometry.map((p) => [+p.lat.toFixed(6), +p.lon.toFixed(6)]) }));
+    try { localStorage.setItem(BIKE_CACHE_KEY, JSON.stringify({ at: Date.now(), elements })); } catch (_) {}
+    return elements;
+  }
+
+  async function loadBikeAndRail(stations) {
+    const status = document.getElementById("bikeStatus");
+    status.textContent = "Loading bike trails and lanes from OpenStreetMap…";
+    try {
+      const els = await fetchBikeAndRail(stations);
+      bikeLayer.clearLayers(); railLayer.clearLayers();
+      const circles = stations.map((s) => ({ lat: s.lat, lon: s.lon, r: BIKE_RADIUS_M }));
+      const counts = {}; const names = new Set();
+      const order = ["shared", "lane", "protected", "trail"]; // draw trails on top
+      const byClass = { trail: [], protected: [], lane: [], shared: [] };
+      for (const e of els) {
+        if (e.tags.railway === "light_rail") {
+          if (/^(yard|siding|spur)$/.test(e.tags.service || "")) continue;
+          L.polyline(e.g, { className: "rail-casing", weight: 7, interactive: false }).addTo(railLayer);
+          L.polyline(e.g, { className: "rail-line", weight: 3, interactive: false }).addTo(railLayer);
+          continue;
+        }
+        const k = bikeClass(e.tags);
+        if (k) byClass[k].push(e);
+      }
+      for (const k of order) {
+        const st = BIKE_STYLE[k];
+        for (const e of byClass[k]) {
+          const pieces = clipToCircles(e.g, circles);
+          if (!pieces.length) continue;
+          counts[k] = (counts[k] || 0) + 1;
+          const nm = e.tags.name || "";
+          if (k === "trail" && nm) names.add(nm);
+          const tip = `<strong>${esc(st.label)}</strong>${nm ? `<br>${esc(nm)}` : ""}`;
+          L.polyline(pieces, { className: "bk-casing", weight: st.weight + 4, interactive: false }).addTo(bikeLayer);
+          L.polyline(pieces, { className: st.cls, weight: st.weight, dashArray: st.dash, lineCap: "round" })
+            .bindTooltip(tip, { sticky: true }).addTo(bikeLayer);
+        }
+      }
+      stations.forEach((s) => L.circle([s.lat, s.lon], { radius: BIKE_RADIUS_M, className: "bike-ring", weight: 1.5, dashArray: "2 5", fill: false, interactive: false }).addTo(bikeLayer));
+      const total = Object.values(counts).reduce((x, y) => x + y, 0);
+      status.textContent = total
+        ? "Bike trails and lanes within ½ mile of each station are shown in green; hover or tap one for details." +
+          (names.size ? ` Named trails: ${[...names].sort().join(", ")}.` : "")
+        : "No mapped bike trails or lanes found within ½ mile.";
+    } catch (err) {
+      status.innerHTML = `Couldn't load bike routes (${esc(err.message)}). <button type="button" class="linkbtn" id="bikeRetry">Retry</button>`;
+      document.getElementById("bikeRetry").addEventListener("click", () => loadBikeAndRail(stations));
+    }
+  }
+
+  function stationLabel(s) {
+    const badges = s.lines.map((l) => `<span class="ln">${esc(l.id)}</span>`).join("") +
+      (s.suspended || []).map((l) => `<span class="ln ln-off" title="${esc(l.id)} Line ${esc(l.note)}">${esc(l.id)}</span>`).join("");
+    return `<div class="station-label" style="--st:${stationColor(s.id)}"><span class="st-name">${esc(s.name)}</span><span class="lns">${badges}</span></div>`;
+  }
+  function stationPopup(s) {
+    const row = (l, off) => `<li${off ? ' class="off"' : ""}><span class="ln${off ? " ln-off" : ""}">${esc(l.id)}</span> ${esc(l.id)} Line: ${esc(l.route)}${l.note ? ` <em>(${esc(l.note)})</em>` : ""}</li>`;
+    return `<strong>${esc(s.name)} station</strong><br>${esc(s.address)}
+      <ul class="line-list">${s.lines.map((l) => row(l, false)).join("")}${(s.suspended || []).map((l) => row(l, true)).join("")}</ul>
+      <span class="hint">RTD service as of the Sept 27, 2026 changes.</span>`;
+  }
+
   // ---------- boot ----------
   Promise.all(["data/stations.json", "data/apartments.json", "data/walksheds.geojson"].map((u) => fetch(u).then((r) => r.json())))
     .then(([stations, apts, zones]) => {
@@ -187,10 +342,12 @@
       });
       stations.forEach((s) => {
         L.marker([s.lat, s.lon], {
-          icon: L.divIcon({ className: "", html: `<div class="station-icon" style="background:${stationColor(s.id)}">RTD</div>`, iconSize: [36, 22], iconAnchor: [18, 11] }),
-          zIndexOffset: 1000, title: s.name,
-        }).bindPopup(`<strong>${esc(s.name)} station</strong><br>${esc(s.address)}<br>Lines: ${s.lines.join(", ")}<br>Shaded: 15-minute walk`).addTo(zoneLayer);
+          icon: L.divIcon({ className: "station-marker", html: stationLabel(s), iconSize: null, iconAnchor: [9, 9] }),
+          zIndexOffset: 1000, title: `${s.name} station`, keyboard: true,
+        }).bindPopup(stationPopup(s)).addTo(stationLayer);
       });
+      loadBikeAndRail(stations);
+      if (matchMedia("(max-width: 760px)").matches) document.getElementById("legend").open = false;
       map.fitBounds(L.geoJSON(zones).getBounds(), { padding: [20, 20] });
 
       document.querySelectorAll('input[name="station"]').forEach((r) => r.addEventListener("change", (e) => {

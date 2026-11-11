@@ -1,4 +1,23 @@
 [
-  {"id": "louisiana-pearl", "name": "Louisiana–Pearl", "address": "755 E Louisiana Ave", "lat": 39.69278, "lon": -104.97833, "lines": ["E", "H"]},
-  {"id": "i25-broadway", "name": "I-25 & Broadway", "address": "901 S Broadway", "lat": 39.70170, "lon": -104.99007, "lines": ["D", "E", "H"]}
+  {
+    "id": "louisiana-pearl", "name": "Louisiana–Pearl", "address": "755 E Louisiana Ave", "lat": 39.69278, "lon": -104.97833,
+    "lines": [
+      {"id": "E", "route": "Union Station ↔ RidgeGate Parkway"},
+      {"id": "T", "route": "Lincoln ↔ Alameda", "note": "temporary"}
+    ],
+    "suspended": [
+      {"id": "H", "route": "Florida ↔ 18th•California", "note": "suspended during Downtown Rail Reconstruction"}
+    ]
+  },
+  {
+    "id": "i25-broadway", "name": "I-25 & Broadway", "address": "901 S Broadway", "lat": 39.70170, "lon": -104.99007,
+    "lines": [
+      {"id": "C", "route": "Littleton•Mineral ↔ Union Station"},
+      {"id": "E", "route": "Union Station ↔ RidgeGate Parkway"},
+      {"id": "T", "route": "Lincoln ↔ Alameda", "note": "temporary"}
+    ],
+    "suspended": [
+      {"id": "H", "route": "Florida ↔ 18th•California", "note": "suspended during Downtown Rail Reconstruction"}
+    ]
+  }
 ]

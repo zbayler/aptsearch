@@ -7,8 +7,8 @@ Status key: ✅ done · 🟡 partial · ⏸ deferred · ⬜ not started
 
 | # | Requirement (from Notion) | Status | Notes |
 |---|---|---|---|
-| 1 | **Base map:** roads, RTD light rail lines and stations, bike routes | 🟡 | Roads + the two target stations on the map. Rail lines and bike routes not yet drawn. |
-| 2 | **Bikes:** off-street trails (High Line Canal, Cherry Creek Trail, South Platte River Trail) styled differently from on-street bike lanes; each building shows distance to both | ⬜ | |
+| 1 | **Base map:** roads, RTD light rail lines and stations, bike routes | ✅ | Muted grey OSM basemap (switchable to colour or CyclOSM). Light rail tracks drawn; stations labelled with the lines serving them (C/E/T, H suspended — RTD Sept 27, 2026 service). Bike routes within ½ mile of each station. |
+| 2 | **Bikes:** off-street trails (High Line Canal, Cherry Creek Trail, South Platte River Trail) styled differently from on-street bike lanes; each building shows distance to both | 🟡 | Trails, protected lanes, painted lanes and sharrows styled differently within a ½-mile radius of each station (live from OpenStreetMap). Per-building distance to each not yet shown. |
 | 3 | **Transit:** 10-minute walking area (~½ mi) around each station, based on actual streets, not a straight circle | ✅ (scope changed) | Now **15 min (~0.75 mi / 1,200 m)** per latest request, for **Louisiana–Pearl** and **I-25 & Broadway** only. Real street-network walksheds from the OSM foot router. |
 | 4 | **Budget:** filter to $1,500–$2,500/month; flag places slightly over | ⬜ | Needs rent data. |
 | 5 | **Must-haves:** extra storage, in-unit laundry | ⬜ | Needs per-building amenity data. |
