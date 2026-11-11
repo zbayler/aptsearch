@@ -11,7 +11,7 @@
   --osm: #8a8a84;
   --hl: #fff4cc;
   --bk-trail: #05843a; --bk-protected: #12a150; --bk-lane: #12a150; --bk-shared: #4f9a2a;
-  --bk-casing: #ffffff; --rail: #3a3a3a; --rail-casing: #ffffff; --ring: #05843a;
+  --bk-casing: #ffffff; --rail: #3a3a3a; --rail-casing: #ffffff; --ring: #05843a; --bk-regional: #0f6e8c;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
@@ -19,14 +19,14 @@
     --bg: #161615; --surface: #1f1f1d; --text: #ecece8; --muted: #a3a39c;
     --border: #3a3a36; --accent: #8fb6e0; --lp: #f08a4b; --ib: #6ea8e6;
     --both: #b48ee0; --osm: #8f8f88; --hl: #3d3620; color-scheme: dark;
-    --bk-trail: #3ee07f; --bk-protected: #2cc76a; --bk-lane: #2cc76a; --bk-shared: #9bd45a; --bk-casing: #10110f; --rail: #d8d8d2; --rail-casing: #10110f; --ring: #3ee07f;
+    --bk-trail: #3ee07f; --bk-protected: #2cc76a; --bk-lane: #2cc76a; --bk-shared: #9bd45a; --bk-casing: #10110f; --rail: #d8d8d2; --rail-casing: #10110f; --ring: #3ee07f; --bk-regional: #4cc3e6;
   }
 }
 :root[data-theme="dark"] {
   --bg: #161615; --surface: #1f1f1d; --text: #ecece8; --muted: #a3a39c;
   --border: #3a3a36; --accent: #8fb6e0; --lp: #f08a4b; --ib: #6ea8e6;
   --both: #b48ee0; --osm: #8f8f88; --hl: #3d3620; color-scheme: dark;
-    --bk-trail: #3ee07f; --bk-protected: #2cc76a; --bk-lane: #2cc76a; --bk-shared: #9bd45a; --bk-casing: #10110f; --rail: #d8d8d2; --rail-casing: #10110f; --ring: #3ee07f;
+    --bk-trail: #3ee07f; --bk-protected: #2cc76a; --bk-lane: #2cc76a; --bk-shared: #9bd45a; --bk-casing: #10110f; --rail: #d8d8d2; --rail-casing: #10110f; --ring: #3ee07f; --bk-regional: #4cc3e6;
 }
 
 * { box-sizing: border-box; }
@@ -110,12 +110,15 @@ h1 { font-size: 1.25rem; margin: 0 0 2px; }
 }
 :root[data-theme="dark"] .base-tiles { filter: invert(1) hue-rotate(180deg) brightness(.95) contrast(.9); }
 
-/* Muted basemap: grey and soft so bike routes and pins stand out. */
-.base-muted { filter: grayscale(1) contrast(.82) brightness(1.06); opacity: .9; }
+/* Soft basemap: full street detail, calmer colours and less glare. */
+.base-soft { filter: saturate(.4) contrast(.72) brightness(1.03); opacity: .85; }
+.base-grey { filter: grayscale(1) contrast(.82) brightness(1.04); }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .base-muted { filter: grayscale(1) invert(1) contrast(.72) brightness(.85); opacity: 1; }
+  :root:not([data-theme="light"]) .base-soft { filter: invert(1) hue-rotate(180deg) saturate(.5) contrast(.8) brightness(.85); }
+  :root:not([data-theme="light"]) .base-grey { filter: grayscale(1) invert(1) contrast(.72) brightness(.85); }
 }
-:root[data-theme="dark"] .base-muted { filter: grayscale(1) invert(1) contrast(.72) brightness(.85); opacity: 1; }
+:root[data-theme="dark"] .base-soft { filter: invert(1) hue-rotate(180deg) saturate(.5) contrast(.8) brightness(.85); }
+:root[data-theme="dark"] .base-grey { filter: grayscale(1) invert(1) contrast(.72) brightness(.85); }
 
 /* Bike network + rail (Leaflet paths and legend swatches). */
 .bk-casing { stroke: var(--bk-casing); stroke-opacity: .95; }
@@ -167,3 +170,13 @@ h1 { font-size: 1.25rem; margin: 0 0 2px; }
 .legend[open] summary { margin-bottom: 2px; }
 .legend { display: block; }
 .legend > span { display: block; }
+
+/* Regional trails: full length, teal so they read as "trail network" beyond the 1-mile area. */
+.bk-regional { stroke: var(--bk-regional); stroke-opacity: 1; }
+.trail-label-wrap { background: none; border: 0; }
+.trail-label {
+  display: inline-block; transform: translate(-50%, -140%); white-space: nowrap;
+  background: var(--surface); color: var(--bk-regional); border: 1.5px solid var(--bk-regional);
+  border-radius: 999px; padding: 1px 7px; font-size: 11px; font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0,0,0,.25);
+}

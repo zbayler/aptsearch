@@ -10,33 +10,37 @@
 
   // ---------- map ----------
   const map = L.map("map", { zoomControl: true }).setView([39.697, -104.984], 15);
-  // Basemaps: all free, no API key. "Muted" is the standard OSM map greyed out
-  // with a CSS filter (see style.css) so the bike network and pins stand out.
+  // Basemaps: all free, no API key. "Soft" is the standard OSM map with its
+  // colours and brightness turned down by a CSS filter (see style.css), so the
+  // street detail stays but the bike network and pins stand out.
   const OSM_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
   const OSM_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
   const basemaps = {
-    "Muted (grey)": L.tileLayer(OSM_URL, { maxZoom: 19, className: "base-tiles base-muted", attribution: OSM_ATTR }),
+    "Soft (dimmed)": L.tileLayer(OSM_URL, { maxZoom: 19, className: "base-tiles base-soft", attribution: OSM_ATTR }),
+    "Grey": L.tileLayer(OSM_URL, { maxZoom: 19, className: "base-tiles base-grey", attribution: OSM_ATTR }),
     "Standard (colour)": L.tileLayer(OSM_URL, { maxZoom: 19, className: "base-tiles", attribution: OSM_ATTR }),
     "Cycling (CyclOSM)": L.tileLayer("https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png", {
       maxZoom: 19, subdomains: "abc", className: "base-tiles",
       attribution: `${OSM_ATTR} &middot; <a href="https://www.cyclosm.org">CyclOSM</a>`,
     }),
   };
-  const BASEMAP_KEY = "aptsearch.basemap";
-  let startBase = "Muted (grey)";
+  const BASEMAP_KEY = "aptsearch.basemap.v2";
+  let startBase = "Soft (dimmed)";
   try { const saved = localStorage.getItem(BASEMAP_KEY); if (saved && basemaps[saved]) startBase = saved; } catch (_) {}
   basemaps[startBase].addTo(map);
   map.on("baselayerchange", (e) => { try { localStorage.setItem(BASEMAP_KEY, e.name); } catch (_) {} });
 
   const zoneLayer = L.layerGroup().addTo(map);
   const railLayer = L.layerGroup().addTo(map);
+  const trailLayer = L.layerGroup().addTo(map);
   const bikeLayer = L.layerGroup().addTo(map);
   const stationLayer = L.layerGroup().addTo(map);
   const aptLayer = L.layerGroup().addTo(map);
   const osmLayer = L.layerGroup().addTo(map);
   L.control.layers(basemaps, {
     "15-min walk zones": zoneLayer,
-    "Bike trails &amp; lanes (½ mi)": bikeLayer,
+    "Bike trails &amp; lanes (1 mi)": bikeLayer,
+    "Regional trails": trailLayer,
     "Light rail tracks": railLayer,
   }, { position: "topright", collapsed: true }).addTo(map);
 
@@ -193,8 +197,8 @@
   }
 
   // ---------- bike network + light rail (OpenStreetMap, fetched in the browser) ----------
-  const BIKE_RADIUS_M = 805; // 0.5 mile
-  const BIKE_CACHE_KEY = "aptsearch.bike.v1";
+  const BIKE_RADIUS_M = 1609; // 1 mile
+  const BIKE_CACHE_KEY = "aptsearch.bike.v2";
   const BIKE_CACHE_MS = 7 * 24 * 3600 * 1000;
 
   // Off-street trail > protected lane > painted lane > shared lane (sharrows).
@@ -308,12 +312,80 @@
       stations.forEach((s) => L.circle([s.lat, s.lon], { radius: BIKE_RADIUS_M, className: "bike-ring", weight: 1.5, dashArray: "2 5", fill: false, interactive: false }).addTo(bikeLayer));
       const total = Object.values(counts).reduce((x, y) => x + y, 0);
       status.textContent = total
-        ? "Bike trails and lanes within ½ mile of each station are shown in green; hover or tap one for details." +
+        ? "Bike trails and lanes within 1 mile of each station are shown in green; hover or tap one for details." +
           (names.size ? ` Named trails: ${[...names].sort().join(", ")}.` : "")
-        : "No mapped bike trails or lanes found within ½ mile.";
+        : "No mapped bike trails or lanes found within 1 mile.";
     } catch (err) {
       status.innerHTML = `Couldn't load bike routes (${esc(err.message)}). <button type="button" class="linkbtn" id="bikeRetry">Retry</button>`;
       document.getElementById("bikeRetry").addEventListener("click", () => loadBikeAndRail(stations));
+    }
+  }
+
+  // ---------- regional trails (full length, regardless of distance) ----------
+  const TRAILS_CACHE_KEY = "aptsearch.trails.v1";
+  const METRO_BBOX = "39.45,-105.25,39.90,-104.70"; // Denver metro
+  const TRAIL_RE = "(cherry creek|south platte|platte river|mary carter|c-? ?470).*(trail|greenway|bikeway|path)";
+  const TRAILS = [
+    { name: "South Platte River Trail", test: /platte|mary carter/i },
+    { name: "Cherry Creek Trail", test: /cherry creek/i },
+    { name: "C-470 Trail", test: /c-? ?470/i },
+  ];
+  const trailOf = (nm) => (/state park/i.test(nm || "") ? null : TRAILS.find((t) => t.test.test(nm || "")));
+
+  async function fetchTrails() {
+    try {
+      const c = JSON.parse(localStorage.getItem(TRAILS_CACHE_KEY) || "null");
+      if (c && Date.now() - c.at < BIKE_CACHE_MS) return c.lines;
+    } catch (_) {}
+    const q = `[out:json][timeout:60];(` +
+      `relation["route"~"^(bicycle|foot|hiking)$"]["name"~"${TRAIL_RE}",i](${METRO_BBOX});` +
+      `way["highway"~"^(cycleway|path|footway)$"]["name"~"${TRAIL_RE}",i](${METRO_BBOX});` +
+      `);out geom tags;`;
+    const res = await fetch(OVERPASS, { method: "POST", body: "data=" + encodeURIComponent(q), headers: { "Content-Type": "application/x-www-form-urlencoded" } });
+    if (!res.ok) throw new Error(`Overpass ${res.status}`);
+    const lines = [];
+    const round = (g) => g.map((p) => [+p.lat.toFixed(5), +p.lon.toFixed(5)]);
+    for (const e of (await res.json()).elements || []) {
+      const t = trailOf(e.tags && e.tags.name);
+      if (!t) continue;
+      if (e.type === "way" && e.geometry) lines.push({ trail: t.name, g: round(e.geometry) });
+      if (e.type === "relation") for (const m of e.members || []) if (m.type === "way" && m.geometry) lines.push({ trail: t.name, g: round(m.geometry) });
+    }
+    try { localStorage.setItem(TRAILS_CACHE_KEY, JSON.stringify({ at: Date.now(), lines })); } catch (_) {}
+    return lines;
+  }
+
+  async function loadTrails(stations) {
+    const status = document.getElementById("trailStatus");
+    status.textContent = "Loading South Platte, Cherry Creek and C-470 trails…";
+    try {
+      const lines = await fetchTrails();
+      trailLayer.clearLayers();
+      const mid = [stations.reduce((a, s) => a + s.lat, 0) / stations.length, stations.reduce((a, s) => a + s.lon, 0) / stations.length];
+      const info = [];
+      for (const t of TRAILS) {
+        const mine = lines.filter((l) => l.trail === t.name);
+        if (!mine.length) { info.push(`${t.name}: not found in OpenStreetMap`); continue; }
+        // Straight-line distance from each station to the closest point on the trail.
+        const near = stations.map((s) => {
+          let best = Infinity;
+          for (const l of mine) for (const p of l.g) best = Math.min(best, metersBetween([s.lat, s.lon], p));
+          return { s, mi: best / 1609.34 };
+        });
+        let labelAt = null, bestMid = Infinity;
+        for (const l of mine) for (const p of l.g) { const d = metersBetween(mid, p); if (d < bestMid) { bestMid = d; labelAt = p; } }
+        const dist = near.map((n) => `${n.mi.toFixed(1)} mi from ${n.s.name}`).join(", ");
+        const tip = `<strong>${esc(t.name)}</strong><br>${esc(dist)} (straight line)`;
+        const g = mine.map((l) => l.g);
+        L.polyline(g, { className: "bk-casing", weight: 9, interactive: false }).addTo(trailLayer);
+        L.polyline(g, { className: "bk-regional", weight: 5, lineCap: "round" }).bindTooltip(tip, { sticky: true }).addTo(trailLayer);
+        L.marker(labelAt, { icon: L.divIcon({ className: "trail-label-wrap", html: `<span class="trail-label">${esc(t.name)}</span>`, iconSize: null }), interactive: false, keyboard: false }).addTo(trailLayer);
+        info.push(`${t.name}: ${dist}`);
+      }
+      status.innerHTML = `<strong>Regional trails</strong> (straight-line distance to nearest point):<br>${info.map(esc).join("<br>")}`;
+    } catch (err) {
+      status.innerHTML = `Couldn't load regional trails (${esc(err.message)}). <button type="button" class="linkbtn" id="trailRetry">Retry</button>`;
+      document.getElementById("trailRetry").addEventListener("click", () => loadTrails(stations));
     }
   }
 
@@ -347,6 +419,7 @@
         }).bindPopup(stationPopup(s)).addTo(stationLayer);
       });
       loadBikeAndRail(stations);
+      loadTrails(stations);
       if (matchMedia("(max-width: 760px)").matches) document.getElementById("legend").open = false;
       map.fitBounds(L.geoJSON(zones).getBounds(), { padding: [20, 20] });
 
