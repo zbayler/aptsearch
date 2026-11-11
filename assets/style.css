@@ -104,3 +104,9 @@ h1 { font-size: 1.25rem; margin: 0 0 2px; }
   .panel { border-right: 0; border-top: 1px solid var(--border); overflow: visible; }
   body { display: block; }
 }
+
+/* Dim the light OSM basemap in dark mode. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .base-tiles { filter: invert(1) hue-rotate(180deg) brightness(.95) contrast(.9); }
+}
+:root[data-theme="dark"] .base-tiles { filter: invert(1) hue-rotate(180deg) brightness(.95) contrast(.9); }

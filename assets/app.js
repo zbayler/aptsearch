@@ -7,17 +7,15 @@
   const state = { station: "all", maxWalk: 15, stations: [], apts: [], osm: [], markers: new Map(), active: null };
 
   const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-  const dark = () => matchMedia("(prefers-color-scheme: dark)").matches &&
-    document.documentElement.dataset.theme !== "light" || document.documentElement.dataset.theme === "dark";
 
   // ---------- map ----------
   const map = L.map("map", { zoomControl: true }).setView([39.697, -104.984], 15);
-  const tileUrl = dark()
-    ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-    : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
-  L.tileLayer(tileUrl, {
-    maxZoom: 19, subdomains: "abcd",
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+  // Standard OpenStreetMap tiles: free, no API key (light personal use is within
+  // the OSM tile policy). Dark mode dims them with a CSS filter (see style.css).
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    className: "base-tiles",
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
   }).addTo(map);
 
   const zoneLayer = L.layerGroup().addTo(map);

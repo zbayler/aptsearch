@@ -6,7 +6,8 @@
   <!-- Keep this page out of search engines. robots.txt blocks crawling too. -->
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
   <meta name="googlebot" content="noindex, nofollow">
-  <meta name="referrer" content="no-referrer">
+  <!-- OSM's tile servers require a Referer; send only the site origin. -->
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>Apartment Walk Map</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
