@@ -1,0 +1,65 @@
+[
+ {
+  "name": "Mason at Alameda Station",
+  "address": "275 S Cherokee St",
+  "built": "2014",
+  "units": 338,
+  "website": null,
+  "source": "https://www.greystar.com",
+  "notes": "Borderline check — near Alameda station.",
+  "lat": 39.711659,
+  "lon": -104.992464,
+  "walk": {
+   "louisiana-pearl": {
+    "meters": 2931,
+    "minutes": 36.6
+   },
+   "i25-broadway": {
+    "meters": 1326,
+    "minutes": 16.6
+   }
+  }
+ },
+ {
+  "name": "Encore Evans Station",
+  "address": "1805 S Bannock St",
+  "built": null,
+  "units": null,
+  "website": null,
+  "source": "https://offcampushousing.msudenver.edu/housing/property/encore-evans-station-apartments/83p5623",
+  "notes": "Borderline check — near Evans station.",
+  "lat": 39.683512,
+  "lon": -104.990007,
+  "walk": {
+   "louisiana-pearl": {
+    "meters": 2013,
+    "minutes": 25.2
+   },
+   "i25-broadway": {
+    "meters": 2525,
+    "minutes": 31.6
+   }
+  }
+ },
+ {
+  "name": "The Overland",
+  "address": "2065 S Cherokee St",
+  "built": "2021",
+  "units": 140,
+  "website": null,
+  "source": "",
+  "notes": "Borderline check — near Evans station.",
+  "lat": 39.679182,
+  "lon": -104.991187,
+  "walk": {
+   "louisiana-pearl": {
+    "meters": 2587,
+    "minutes": 32.3
+   },
+   "i25-broadway": {
+    "meters": 3103,
+    "minutes": 38.8
+   }
+  }
+ }
+]

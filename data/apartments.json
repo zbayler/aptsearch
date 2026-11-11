@@ -1,0 +1,275 @@
+[
+ {
+  "name": "Wash Park Station",
+  "address": "675 E Louisiana Ave",
+  "built": "2015",
+  "units": null,
+  "website": "https://www.rentcafe.com/apartments/co/denver/wash-park-station/default.aspx",
+  "source": "https://www.aptamigo.com/CO/Denver/Apartment/wash-park-station",
+  "notes": "Laramar. 1–2 bed.",
+  "lat": 39.693055,
+  "lon": -104.979588,
+  "walk": {
+   "louisiana-pearl": {
+    "meters": 139,
+    "minutes": 1.7
+   },
+   "i25-broadway": {
+    "meters": 1790,
+    "minutes": 22.4
+   }
+  }
+ },
+ {
+  "name": "Louisiana Station Lofts",
+  "address": "1313 S Clarkson St",
+  "built": "2006",
+  "units": 33,
+  "website": null,
+  "source": "https://www.apartments.com/louisiana-station-lofts-denver-co/8j8tp52/",
+  "notes": "4 stories, no pets per listing.",
+  "lat": 39.692261,
+  "lon": -104.978152,
+  "walk": {
+   "louisiana-pearl": {
+    "meters": 151,
+    "minutes": 1.9
+   },
+   "i25-broadway": {
+    "meters": 1927,
+    "minutes": 24.1
+   }
+  }
+ },
+ {
+  "name": "Aston on South Pearl",
+  "address": "1250 S Pearl St",
+  "built": "2023",
+  "units": null,
+  "website": null,
+  "source": "https://www.apartmentlist.com/co/denver/aston-on-south-pearl",
+  "notes": "5 stories, studios–2 bed.",
+  "lat": 39.69376,
+  "lon": -104.98034,
+  "walk": {
+   "louisiana-pearl": {
+    "meters": 279,
+    "minutes": 3.5
+   },
+   "i25-broadway": {
+    "meters": 1669,
+    "minutes": 20.9
+   }
+  }
+ },
+ {
+  "name": "Carraway",
+  "address": "1190 S Pennsylvania St",
+  "built": "new",
+  "units": 42,
+  "website": null,
+  "source": "https://www.zillow.com/apartments/denver-co/carraway-apartments/Cknqfb/",
+  "notes": "Triangle at Buchtel Blvd & Arizona.",
+  "lat": 39.694892,
+  "lon": -104.981483,
+  "walk": {
+   "louisiana-pearl": {
+    "meters": 420,
+    "minutes": 5.2
+   },
+   "i25-broadway": {
+    "meters": 1478,
+    "minutes": 18.5
+   }
+  }
+ },
+ {
+  "name": "1411 South Pearl",
+  "address": "1411 S Pearl St",
+  "built": "new",
+  "units": null,
+  "website": null,
+  "source": "https://www.apartments.com/1411-s-pearl-st-denver-co/tcgrw28/",
+  "notes": "Studios & 1 bed; may be <20 units.",
+  "lat": 39.690937,
+  "lon": -104.980513,
+  "walk": {
+   "louisiana-pearl": {
+    "meters": 432,
+    "minutes": 5.4
+   },
+   "i25-broadway": {
+    "meters": 1974,
+    "minutes": 24.7
+   }
+  }
+ },
+ {
+  "name": "SB1K Apartments",
+  "address": "1000 S Broadway",
+  "built": "2014",
+  "units": null,
+  "website": null,
+  "source": "https://www.aptamigo.com/CO/Denver/Apartment/sb1k-apartments",
+  "notes": "Studio–3 bed, pool.",
+  "lat": 39.698549,
+  "lon": -104.987379,
+  "walk": {
+   "louisiana-pearl": {
+    "meters": 1237,
+    "minutes": 15.5
+   },
+   "i25-broadway": {
+    "meters": 686,
+    "minutes": 8.6
+   }
+  }
+ },
+ {
+  "name": "The Henry",
+  "address": "201 E Mississippi Ave",
+  "built": null,
+  "units": null,
+  "website": "https://www.greystar.com/properties/denver-co/the-henry",
+  "source": "https://www.carmelpartners.com/project/the-henry/",
+  "notes": "Greystar-managed.",
+  "lat": 39.696679,
+  "lon": -104.983871,
+  "walk": {
+   "louisiana-pearl": {
+    "meters": 822,
+    "minutes": 10.3
+   },
+   "i25-broadway": {
+    "meters": 1212,
+    "minutes": 15.2
+   }
+  }
+ },
+ {
+  "name": "Platt Park by Windsor",
+  "address": "99 E Arizona Ave",
+  "built": null,
+  "units": 303,
+  "website": "https://www.windsorcommunities.com/properties/platt-park-by-windsor/",
+  "source": "https://www.hanoverco.com/property/hanover-platt-park/",
+  "notes": "Formerly Hanover Platt Park.",
+  "lat": 39.69485,
+  "lon": -104.986301,
+  "walk": {
+   "louisiana-pearl": {
+    "meters": 828,
+    "minutes": 10.4
+   },
+   "i25-broadway": {
+    "meters": 1178,
+    "minutes": 14.7
+   }
+  }
+ },
+ {
+  "name": "Redpeak Platt Park Townhomes",
+  "address": "200 E Mississippi Ave",
+  "built": null,
+  "units": null,
+  "website": null,
+  "source": "https://www.point2homes.com/US/Apartment-Buildings/CO/Denver.html",
+  "notes": "Townhome rentals along 110–390 E Mississippi Ave.",
+  "lat": 39.696566,
+  "lon": -104.984996,
+  "walk": {
+   "louisiana-pearl": {
+    "meters": 888,
+    "minutes": 11.1
+   },
+   "i25-broadway": {
+    "meters": 1101,
+    "minutes": 13.8
+   }
+  }
+ },
+ {
+  "name": "W Park Apartments",
+  "address": "918 S Pennsylvania St",
+  "built": null,
+  "units": null,
+  "website": null,
+  "source": "https://offcampushousing.ucdenver.edu",
+  "notes": "Probably a small building.",
+  "lat": 39.699899,
+  "lon": -104.981491,
+  "walk": {
+   "louisiana-pearl": {
+    "meters": 971,
+    "minutes": 12.1
+   },
+   "i25-broadway": {
+    "meters": 1325,
+    "minutes": 16.6
+   }
+  }
+ },
+ {
+  "name": "Windsor at Broadway Station",
+  "address": "1145 S Broadway",
+  "built": "2007–2010",
+  "units": 420,
+  "website": "https://www.windsorcommunities.com/properties/windsor-at-broadway-station/",
+  "source": "https://www.rentcafe.com/apartments/co/denver/windsor-at-broadway-station/default.aspx",
+  "notes": "Pool, dog park, EV charging.",
+  "lat": 39.695804,
+  "lon": -104.987513,
+  "walk": {
+   "louisiana-pearl": {
+    "meters": 1033,
+    "minutes": 12.9
+   },
+   "i25-broadway": {
+    "meters": 1033,
+    "minutes": 12.9
+   }
+  }
+ },
+ {
+  "name": "1745 S Pearl",
+  "address": "1745 S Pearl St",
+  "built": null,
+  "units": 12,
+  "website": null,
+  "source": "https://www.apartments.com/1745-s-pearl-st-denver-co/ebcjh0q",
+  "notes": "Small boutique building.",
+  "lat": 39.684961,
+  "lon": -104.980541,
+  "walk": {
+   "louisiana-pearl": {
+    "meters": 1092,
+    "minutes": 13.6
+   },
+   "i25-broadway": {
+    "meters": 2638,
+    "minutes": 33.0
+   }
+  }
+ },
+ {
+  "name": "1775 S Pearl",
+  "address": "1775 S Pearl St",
+  "built": "2021",
+  "units": 27,
+  "website": null,
+  "source": "https://www.rentcafe.com/apartments/co/denver/1775-s-pearl/default.aspx",
+  "notes": "Near Old South Pearl shops.",
+  "lat": 39.684456,
+  "lon": -104.980546,
+  "walk": {
+   "louisiana-pearl": {
+    "meters": 1148,
+    "minutes": 14.3
+   },
+   "i25-broadway": {
+    "meters": 2695,
+    "minutes": 33.7
+   }
+  }
+ }
+]

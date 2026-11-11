@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Keep this page out of search engines. robots.txt blocks crawling too. -->
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta name="googlebot" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <title>Apartment Walk Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="top">
+    <div>
+      <h1>Apartment Walk Map</h1>
+      <p class="sub">Apartment buildings within a 15-minute walk of the Louisiana–Pearl and I-25 &amp; Broadway RTD light rail stations, South Denver.</p>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="panel" aria-label="Filters and results">
+      <div class="controls">
+        <fieldset class="seg" aria-label="Station">
+          <label><input type="radio" name="station" value="all" checked> Both</label>
+          <label><input type="radio" name="station" value="louisiana-pearl"> Louisiana–Pearl</label>
+          <label><input type="radio" name="station" value="i25-broadway"> I-25 &amp; Broadway</label>
+        </fieldset>
+        <label class="range">
+          <span>Max walk <strong id="maxOut">15</strong> min</span>
+          <input id="maxWalk" type="range" min="3" max="15" step="1" value="15">
+        </label>
+        <button id="osmBtn" type="button" class="btn">Also show other apartment buildings from OpenStreetMap</button>
+        <p id="osmStatus" class="hint" role="status"></p>
+      </div>
+
+      <p class="count" id="count"></p>
+      <ol id="list" class="list"></ol>
+
+      <details class="method">
+        <summary>How walk times are measured</summary>
+        <p>Walk times use real street and path distances from the OpenStreetMap foot router at 3&nbsp;mph (80&nbsp;m per minute), so 15 minutes is about 1,200&nbsp;m (0.75&nbsp;mi). The shaded areas are those 15-minute walking zones, not straight-line circles. Building locations come from the US Census geocoder, so a pin may sit at the address point rather than the front door.</p>
+        <p>Rent, units and amenities are not checked yet. Confirm details with each property.</p>
+      </details>
+    </section>
+
+    <section class="mapwrap" aria-label="Map">
+      <div id="map"></div>
+      <div class="legend" aria-hidden="true">
+        <span><i class="sw lp"></i>Louisiana–Pearl</span>
+        <span><i class="sw ib"></i>I-25 &amp; Broadway</span>
+        <span><i class="sw both"></i>Both within 15 min</span>
+        <span><i class="sw osm"></i>OpenStreetMap (unverified)</span>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>
