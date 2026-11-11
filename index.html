@@ -35,6 +35,8 @@
         </label>
         <button id="osmBtn" type="button" class="btn">Also show other apartment buildings from OpenStreetMap</button>
         <p id="osmStatus" class="hint" role="status"></p>
+        <p id="bikeStatus" class="hint" role="status"></p>
+        <p id="trailStatus" class="hint" role="status"></p>
       </div>
 
       <p class="count" id="count"></p>
@@ -49,12 +51,20 @@
 
     <section class="mapwrap" aria-label="Map">
       <div id="map"></div>
-      <div class="legend" aria-hidden="true">
+      <details class="legend" id="legend" open>
+        <summary>Legend</summary>
         <span><i class="sw lp"></i>Louisiana–Pearl</span>
         <span><i class="sw ib"></i>I-25 &amp; Broadway</span>
         <span><i class="sw both"></i>Both within 15 min</span>
         <span><i class="sw osm"></i>OpenStreetMap (unverified)</span>
-      </div>
+        <span class="lg-sep">Bikes within 1 mile + regional trails</span>
+        <span><svg class="lg-line" viewBox="0 0 28 10"><line class="bk-casing" x1="2" y1="5" x2="26" y2="5" stroke-width="10"/><line class="bk-trail" x1="2" y1="5" x2="26" y2="5" stroke-width="6"/></svg>Off-street trail</span>
+        <span><svg class="lg-line" viewBox="0 0 28 10"><line class="bk-casing" x1="2" y1="5" x2="26" y2="5" stroke-width="9"/><line class="bk-regional" x1="2" y1="5" x2="26" y2="5" stroke-width="5"/></svg>Regional trail (full length)</span>
+        <span><svg class="lg-line" viewBox="0 0 28 10"><line class="bk-casing" x1="2" y1="5" x2="26" y2="5" stroke-width="9"/><line class="bk-protected" x1="2" y1="5" x2="26" y2="5" stroke-width="5"/></svg>Protected lane</span>
+        <span><svg class="lg-line" viewBox="0 0 28 10"><line class="bk-casing" x1="2" y1="5" x2="26" y2="5" stroke-width="8"/><line class="bk-lane" x1="2" y1="5" x2="26" y2="5" stroke-width="4" stroke-dasharray="8 6"/></svg>Painted lane</span>
+        <span><svg class="lg-line" viewBox="0 0 28 10"><line class="bk-casing" x1="2" y1="5" x2="26" y2="5" stroke-width="7"/><line class="bk-shared" x1="2" y1="5" x2="26" y2="5" stroke-width="3" stroke-dasharray="2 6" stroke-linecap="round"/></svg>Shared lane</span>
+        <span><svg class="lg-line" viewBox="0 0 28 10"><line class="rail-casing" x1="2" y1="5" x2="26" y2="5" stroke-width="7"/><line class="rail-line" x1="2" y1="5" x2="26" y2="5" stroke-width="3"/></svg>Light rail</span>
+      </details>
     </section>
   </main>
 
